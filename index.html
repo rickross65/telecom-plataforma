@@ -1,529 +1,439 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telecom Plataforma</title>
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods":
-    "POST, OPTIONS",
-};
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-Deno.serve(async (req) => {
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-  /* =====================================================
-     CORS
-  ===================================================== */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
 
-  if (req.method === "OPTIONS") {
+    .container {
+      max-width: 480px;
+      margin: 60px auto;
+      padding: 20px;
+    }
 
-    return new Response(
-      "ok",
-      {
-        status: 200,
-        headers: corsHeaders
-      }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.10);
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      border: 0;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .secondary {
+      background: #64748b;
+    }
+
+    .secondary:hover {
+      background: #475569;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8fafc;
+      white-space: pre-wrap;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .info {
+      margin-top: 20px;
+      padding: 18px;
+      background: #eff6ff;
+      border-radius: 10px;
+    }
+
+    .dato {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+
+    .dato strong {
+      display: inline-block;
+      min-width: 90px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="loginCard" class="card">
+
+    <h1>Telecom Plataforma</h1>
+
+    <p style="text-align:center;">
+      Inicia sesión para continuar
+    </p>
+
+    <label for="username">Usuario</label>
+    <input
+      id="username"
+      type="text"
+      autocomplete="username"
+      placeholder="Ingrese su usuario"
+    >
+
+    <label for="password">Contraseña</label>
+    <input
+      id="password"
+      type="password"
+      autocomplete="current-password"
+      placeholder="Ingrese su contraseña"
+    >
+
+    <button id="loginButton" onclick="login()">
+      INICIAR SESIÓN
+    </button>
+
+    <div id="loginStatus" class="status hidden"></div>
+
+  </div>
+
+
+  <!-- PANEL -->
+  <div id="appCard" class="card hidden">
+
+    <h1>Telecom Plataforma</h1>
+
+    <div class="info">
+      <div class="dato">
+        <strong>Usuario:</strong>
+        <span id="loggedUser"></span>
+      </div>
+
+      <div class="dato">
+        <strong>Rol:</strong>
+        <span id="loggedRole"></span>
+      </div>
+    </div>
+
+    <button onclick="iniciarLlamada()">
+      INICIAR LLAMADA
+    </button>
+
+    <div id="callResult" class="info hidden">
+
+      <div class="dato">
+        <strong>Número:</strong>
+        <span id="phoneNumber"></span>
+      </div>
+
+      <div class="dato">
+        <strong>Nombre:</strong>
+        <span id="personName"></span>
+      </div>
+
+      <div class="dato">
+        <strong>ID:</strong>
+        <span id="personId"></span>
+      </div>
+
+    </div>
+
+    <button class="secondary" onclick="logout()">
+      CERRAR SESIÓN
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  // =========================================================
+  // CONFIGURACIÓN SUPABASE
+  // =========================================================
+
+  const SUPABASE_URL =
+    "https://mgxplczimlabdctrxslu.supabase.co";
+
+  //sb_publishable_kj-yp8h9txezMg6cpjOyMQ_k3UCEH88 / ANON.
+  // NUNCA pongas aquí la SERVICE_ROLE_KEY.
+  const SUPABASE_ANON_KEY =
+    "PEGA_AQUI_TU_ANON_KEY";
+
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
     );
 
-  }
 
+  // =========================================================
+  // LOGIN
+  // =========================================================
 
-  /* =====================================================
-     SOLO POST
-  ===================================================== */
-
-  if (req.method !== "POST") {
-
-    return new Response(
-      JSON.stringify({
-        error: "Método no permitido."
-      }),
-      {
-        status: 405,
-        headers: {
-          ...corsHeaders,
-          "Content-Type":
-            "application/json"
-        }
-      }
-    );
-
-  }
-
-
-  try {
-
-    /* ===================================================
-       LEER DATOS
-    =================================================== */
-
-    const body =
-      await req.json();
-
+  async function login() {
 
     const username =
-      String(
-        body?.username || ""
-      ).trim();
-
+      document.getElementById("username").value.trim();
 
     const password =
-      String(
-        body?.password || ""
+      document.getElementById("password").value;
+
+    const status =
+      document.getElementById("loginStatus");
+
+    const button =
+      document.getElementById("loginButton");
+
+
+    if (!username || !password) {
+
+      showStatus(
+        "Debes ingresar usuario y contraseña.",
+        "error"
       );
 
-
-    if (!username) {
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "El usuario es obligatorio."
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
+      return;
     }
 
 
-    if (!password) {
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "La contraseña es obligatoria."
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
-    }
-
-
-    /* ===================================================
-       VARIABLES SUPABASE
-    =================================================== */
-
-    const supabaseUrl =
-      Deno.env.get(
-        "SUPABASE_URL"
-      );
-
-
-    const serviceRoleKey =
-      Deno.env.get(
-        "SUPABASE_SERVICE_ROLE_KEY"
-      );
-
-
-    const anonKey =
-      Deno.env.get(
-        "SUPABASE_ANON_KEY"
-      );
-
-
-    if (!supabaseUrl) {
-
-      throw new Error(
-        "Falta SUPABASE_URL en las variables de entorno."
-      );
-
-    }
-
-
-    if (!serviceRoleKey) {
-
-      throw new Error(
-        "Falta SUPABASE_SERVICE_ROLE_KEY en las variables de entorno."
-      );
-
-    }
-
-
-    if (!anonKey) {
-
-      throw new Error(
-        "Falta SUPABASE_ANON_KEY en las variables de entorno."
-      );
-
-    }
-
-
-    /* ===================================================
-       CLIENTE ADMIN
-    =================================================== */
-
-    const supabaseAdmin =
-      createClient(
-        supabaseUrl,
-        serviceRoleKey,
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false
-          }
-        }
-      );
-
-
-    /* ===================================================
-       BUSCAR PERFIL
-    =================================================== */
-
-    const {
-      data: profile,
-      error: profileError
-    } =
-      await supabaseAdmin
-        .from("profiles")
-        .select(
-          "id, username, role, active"
-        )
-        .ilike(
-          "username",
-          username
-        )
-        .maybeSingle();
-
-
-    if (profileError) {
-
-      console.error(
-        "ERROR PROFILES:",
-        profileError
-      );
-
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "Error consultando profiles: " +
-            profileError.message
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
-    }
-
-
-    if (!profile) {
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "El usuario no existe."
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
-    }
-
-
-    /* ===================================================
-       VERIFICAR ACTIVO
-    =================================================== */
-
-    if (profile.active !== true) {
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "El usuario está desactivado."
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
-    }
-
-
-    /* ===================================================
-       BUSCAR USUARIO AUTH
-    =================================================== */
-
-    const {
-      data: authUserData,
-      error: authUserError
-    } =
-      await supabaseAdmin
-        .auth
-        .admin
-        .getUserById(
-          profile.id
-        );
-
-
-    if (authUserError) {
-
-      console.error(
-        "ERROR AUTH USER:",
-        authUserError
-      );
-
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "No se pudo encontrar la cuenta Auth del usuario: " +
-            authUserError.message
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
-    }
-
-
-    const authUser =
-      authUserData?.user;
-
-
-    if (
-      !authUser ||
-      !authUser.email
-    ) {
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "El usuario existe en profiles, pero no tiene una cuenta Auth asociada."
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
-    }
-
-
-    /* ===================================================
-       AUTENTICAR CONTRASEÑA
-    =================================================== */
-
-    const authResponse =
-      await fetch(
-        supabaseUrl +
-        "/auth/v1/token?grant_type=password",
-        {
-          method: "POST",
-
-          headers: {
-
-            "Content-Type":
-              "application/json",
-
-            "apikey":
-              anonKey
-
-          },
-
-          body: JSON.stringify({
-
-            email:
-              authUser.email,
-
-            password:
-              password
-
-          })
-
-        }
-      );
-
-
-    const authText =
-      await authResponse.text();
-
-
-    let authResult = null;
+    button.disabled = true;
+    button.textContent = "INICIANDO...";
 
 
     try {
 
-      authResult =
-        JSON.parse(authText);
-
-    } catch (e) {
-
-      authResult = null;
-
-    }
-
-
-    /* ===================================================
-       CONTRASEÑA INCORRECTA
-    =================================================== */
-
-    if (!authResponse.ok) {
-
-      console.error(
-        "ERROR AUTH:",
-        authText
-      );
-
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "Usuario o contraseña incorrectos."
-        }),
+      const response = await fetch(
+        SUPABASE_URL + "/functions/v1/username-login",
         {
-          status: 401,
+          method: "POST",
+
           headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY
+          },
+
+          body: JSON.stringify({
+            username: username,
+            password: password
+          })
         }
       );
 
-    }
+
+      const data = await response.json();
 
 
-    /* ===================================================
-       VERIFICAR TOKENS
-    =================================================== */
+      if (!response.ok) {
 
-    if (
-      !authResult ||
-      !authResult.access_token ||
-      !authResult.refresh_token
-    ) {
+        throw new Error(
+          data.error ||
+          "Usuario o contraseña incorrectos."
+        );
+      }
 
-      return new Response(
-        JSON.stringify({
-          error:
-            "Supabase Auth no devolvió los tokens de sesión."
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            "Content-Type":
-              "application/json"
-          }
-        }
+
+      if (!data.access_token || !data.refresh_token) {
+
+        throw new Error(
+          "La función de login no devolvió los tokens necesarios."
+        );
+      }
+
+
+      const { error: sessionError } =
+        await supabaseClient.auth.setSession({
+
+          access_token: data.access_token,
+
+          refresh_token: data.refresh_token
+
+        });
+
+
+      if (sessionError) {
+        throw sessionError;
+      }
+
+
+      document.getElementById("loginCard")
+        .classList.add("hidden");
+
+      document.getElementById("appCard")
+        .classList.remove("hidden");
+
+
+      document.getElementById("loggedUser")
+        .textContent =
+        data.user?.username || username;
+
+
+      document.getElementById("loggedRole")
+        .textContent =
+        data.user?.role || "usuario";
+
+
+      showStatus(
+        "Sesión iniciada correctamente.",
+        "success"
       );
 
+
+    } catch (error) {
+
+      console.error(error);
+
+      showStatus(
+        error.message || "Error al iniciar sesión.",
+        "error"
+      );
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "INICIAR SESIÓN";
+
     }
-
-
-    /* ===================================================
-       ÉXITO
-    =================================================== */
-
-    return new Response(
-      JSON.stringify({
-
-        access_token:
-          authResult.access_token,
-
-        refresh_token:
-          authResult.refresh_token,
-
-        expires_in:
-          authResult.expires_in,
-
-        token_type:
-          authResult.token_type,
-
-        user: {
-
-          id:
-            profile.id,
-
-          username:
-            profile.username,
-
-          role:
-            profile.role
-
-        }
-
-      }),
-      {
-        status: 200,
-
-        headers: {
-          ...corsHeaders,
-          "Content-Type":
-            "application/json"
-        }
-      }
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "ERROR GENERAL:",
-      error
-    );
-
-
-    return new Response(
-      JSON.stringify({
-
-        error:
-          error instanceof Error
-            ? error.message
-            : "Error interno de autenticación."
-
-      }),
-      {
-        status: 500,
-
-        headers: {
-          ...corsHeaders,
-          "Content-Type":
-            "application/json"
-        }
-      }
-    );
 
   }
 
-});
+
+  // =========================================================
+  // INICIAR LLAMADA
+  // =========================================================
+
+  function iniciarLlamada() {
+
+    /*
+      POR AHORA mostramos datos de prueba.
+
+      Después conectaremos esta función con la tabla
+      de clientes/contactos de Supabase para obtener:
+
+      - número
+      - nombre
+      - ID
+    */
+
+    document.getElementById("phoneNumber")
+      .textContent = "+56 9 0000 0000";
+
+    document.getElementById("personName")
+      .textContent = "Cliente de prueba";
+
+    document.getElementById("personId")
+      .textContent = "ID-000001";
+
+
+    document.getElementById("callResult")
+      .classList.remove("hidden");
+
+  }
+
+
+  // =========================================================
+  // CERRAR SESIÓN
+  // =========================================================
+
+  async function logout() {
+
+    await supabaseClient.auth.signOut();
+
+    document.getElementById("appCard")
+      .classList.add("hidden");
+
+    document.getElementById("loginCard")
+      .classList.remove("hidden");
+
+    document.getElementById("password")
+      .value = "";
+
+  }
+
+
+  // =========================================================
+  // MENSAJES
+  // =========================================================
+
+  function showStatus(message, type) {
+
+    const status =
+      document.getElementById("loginStatus");
+
+    status.textContent = message;
+
+    status.className =
+      "status " + type;
+
+    status.classList.remove("hidden");
+
+  }
+
+</script>
+
+</body>
+</html>
