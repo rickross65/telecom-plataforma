@@ -5,189 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Telecom Plataforma</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #0b1220;
-      color: #ffffff;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
     }
 
     .container {
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
     }
 
     .card {
-      background: #111827;
-      border: 1px solid #263244;
-      border-radius: 16px;
+      background: white;
       padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.1);
       margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
     }
 
     h1 {
       margin-top: 0;
-      font-size: 28px;
-    }
-
-    h2 {
-      margin-top: 0;
-      font-size: 21px;
     }
 
     label {
       display: block;
       margin-top: 15px;
-      margin-bottom: 7px;
-      color: #cbd5e1;
       font-weight: bold;
     }
 
-    input,
-    select,
-    textarea {
+    input {
       width: 100%;
-      padding: 13px;
-      border-radius: 9px;
-      border: 1px solid #374151;
-      background: #0f172a;
-      color: #ffffff;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 7px;
       font-size: 15px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #38bdf8;
     }
 
     button {
-      margin-top: 18px;
-      padding: 13px 20px;
+      width: 100%;
+      margin-top: 20px;
+      padding: 13px;
       border: 0;
-      border-radius: 9px;
-      background: #2563eb;
+      border-radius: 7px;
+      background: #111827;
       color: white;
-      font-size: 15px;
-      font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
     }
 
     button:hover {
-      background: #1d4ed8;
+      background: #374151;
     }
 
-    button:disabled {
-      opacity: .6;
-      cursor: not-allowed;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .message {
-      padding: 14px;
-      border-radius: 9px;
+    #status {
       margin-top: 15px;
-      white-space: pre-wrap;
+      padding: 12px;
+      background: #eef2ff;
+      border-radius: 7px;
       word-break: break-word;
     }
 
-    .success {
-      background: #064e3b;
-      border: 1px solid #10b981;
-    }
-
-    .error {
-      background: #7f1d1d;
-      border: 1px solid #ef4444;
-    }
-
-    .info {
-      background: #172554;
-      border: 1px solid #3b82f6;
-    }
-
-    .warning {
-      background: #78350f;
-      border: 1px solid #f59e0b;
-    }
-
-    .status {
-      padding: 10px;
-      border-radius: 8px;
-      background: #020617;
-      border: 1px solid #334155;
-      margin-bottom: 15px;
-      font-family: monospace;
-      font-size: 13px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .record {
-      border: 1px solid #334155;
-      background: #0f172a;
-      border-radius: 12px;
-      padding: 18px;
-      margin-top: 15px;
-    }
-
-    .record-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .muted {
-      color: #94a3b8;
-    }
-
-    .danger {
-      background: #dc2626;
-    }
-
-    .danger:hover {
-      background: #b91c1c;
-    }
-
-    .green {
-      background: #059669;
-    }
-
-    .green:hover {
-      background: #047857;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 15px;
-    }
-
-    hr {
-      border: 0;
-      border-top: 1px solid #263244;
-      margin: 25px 0;
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -199,848 +84,266 @@
   <div class="card">
     <h1>Telecom Plataforma</h1>
 
-    <div id="systemStatus" class="status">
-      Iniciando aplicación...
+    <div id="status">
+      Página cargada correctamente.
     </div>
-
-    <div id="globalMessage"></div>
   </div>
 
-  <!-- CONFIGURACIÓN -->
-  <section id="setupSection" class="card">
+  <div class="card" id="conexion">
 
-    <h2>Configurar plataforma</h2>
-
-    <p class="muted">
-      Introduce la URL de tu proyecto Supabase y la clave pública.
-    </p>
+    <h2>Conectar con Supabase</h2>
 
     <label for="projectUrl">Project URL</label>
+
     <input
       id="projectUrl"
       type="text"
       value="https://mgxplczimlabdctrxslu.supabase.co"
-      autocomplete="off"
+      placeholder="https://xxxx.supabase.co"
     >
 
-    <label for="publicKey">Publishable / Anon Key</label>
+    <label for="anonKey">Publishable / Anon Key</label>
+
     <input
-      id="publicKey"
-      type="text"
-      placeholder="Pega aquí tu clave pública de Supabase"
-      autocomplete="off"
+      id="anonKey"
+      type="password"
+      placeholder="Pega aquí tu clave"
     >
 
-    <button id="connectButton" type="button">
-      Conectar
+    <button id="connectButton">
+      CONECTAR
     </button>
 
-    <div id="connectMessage"></div>
+  </div>
 
-  </section>
-
-
-  <!-- LOGIN -->
-  <section id="loginSection" class="card hidden">
+  <div class="card hidden" id="login">
 
     <h2>Iniciar sesión</h2>
 
-    <form id="loginForm">
-
-      <label for="username">
-        Usuario
-      </label>
-
-      <input
-        id="username"
-        type="text"
-        autocomplete="username"
-        required
-      >
-
-      <label for="password">
-        Contraseña
-      </label>
-
-      <input
-        id="password"
-        type="password"
-        autocomplete="current-password"
-        required
-      >
-
-      <button id="loginButton" type="submit">
-        Iniciar sesión
-      </button>
-
-    </form>
-
-    <div id="loginMessage"></div>
-
-  </section>
-
-
-  <!-- APP -->
-  <section id="appSection" class="hidden">
-
-    <div class="card">
-
-      <div class="topbar">
-
-        <div>
-          <h2 id="welcomeTitle">Panel</h2>
-          <div id="userInfo" class="muted"></div>
-        </div>
-
-        <button id="logoutButton" type="button" class="danger">
-          Cerrar sesión
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- REGISTROS -->
-    <div class="card">
-
-      <h2>Registros</h2>
-
-      <button id="refreshRecordsButton" type="button">
-        Actualizar registros
-      </button>
-
-      <div id="recordsMessage"></div>
-
-      <div id="recordsContainer">
-        Cargando...
-      </div>
-
-    </div>
-
-
-    <!-- HISTORIAL -->
-    <div class="card">
-
-      <h2>Historial</h2>
-
-      <div id="historyContainer">
-        Cargando...
-      </div>
-
-    </div>
-
-
-    <!-- ADMIN -->
-    <div id="adminSection" class="hidden">
-
-      <div class="card">
-
-        <h2>Administración</h2>
-
-        <p class="muted">
-          Estas opciones están disponibles solamente para administradores.
-        </p>
-
-        <hr>
-
-        <h3>Crear usuario</h3>
-
-        <form id="createUserForm">
-
-          <label>Usuario</label>
-          <input id="newUsername" required>
-
-          <label>Email</label>
-          <input id="newEmail" type="email" required>
-
-          <label>Contraseña</label>
-          <input id="newPassword" type="password" required>
-
-          <label>Rol</label>
-          <select id="newRole">
-            <option value="operator">Operador</option>
-            <option value="admin">Administrador</option>
-          </select>
-
-          <button type="submit">
-            Crear usuario
-          </button>
-
-        </form>
-
-        <div id="createUserMessage"></div>
-
-        <hr>
-
-        <h3>Crear registro</h3>
-
-        <form id="createRecordForm">
-
-          <label>Usuario asignado</label>
-          <input id="recordUsername" required>
-
-          <label>Nombre / contacto</label>
-          <input id="recordName" required>
-
-          <label>Teléfono</label>
-          <input id="recordPhone" required>
-
-          <label>Dirección</label>
-          <input id="recordAddress">
-
-          <label>Notas</label>
-          <textarea id="recordNotes"></textarea>
-
-          <button type="submit">
-            Crear registro
-          </button>
-
-        </form>
-
-        <div id="createRecordMessage"></div>
-
-        <hr>
-
-        <h3>Activar / desactivar usuario</h3>
-
-        <form id="statusForm">
-
-          <label>Usuario</label>
-          <input id="statusUsername" required>
-
-          <label>Estado</label>
-          <select id="statusValue">
-            <option value="true">Activo</option>
-            <option value="false">Inactivo</option>
-          </select>
-
-          <button type="submit">
-            Guardar estado
-          </button>
-
-        </form>
-
-        <div id="statusMessage"></div>
-
-      </div>
-
-    </div>
-
-  </section>
+    <label for="username">Usuario</label>
+
+    <input
+      id="username"
+      type="text"
+      placeholder="Usuario"
+    >
+
+    <label for="password">Contraseña</label>
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Contraseña"
+    >
+
+    <button id="loginButton">
+      INICIAR SESIÓN
+    </button>
+
+  </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-(function () {
 
-  "use strict";
+console.log("JAVASCRIPT INICIADO");
 
-  /* =========================================================
-     VARIABLES
-  ========================================================= */
+var supabaseClient = null;
 
-  let supabaseClient = null;
-  let currentUser = null;
-  let currentProfile = null;
+var statusBox = document.getElementById("status");
+var connectButton = document.getElementById("connectButton");
+var loginButton = document.getElementById("loginButton");
 
+statusBox.innerHTML = "JavaScript cargado correctamente.";
 
-  /* =========================================================
-     ELEMENTOS
-  ========================================================= */
+connectButton.onclick = function () {
 
-  const setupSection = document.getElementById("setupSection");
-  const loginSection = document.getElementById("loginSection");
-  const appSection = document.getElementById("appSection");
-  const adminSection = document.getElementById("adminSection");
+  statusBox.innerHTML = "Conectando...";
 
-  const projectUrl = document.getElementById("projectUrl");
-  const publicKey = document.getElementById("publicKey");
+  var url = document.getElementById("projectUrl").value.trim();
+  var key = document.getElementById("anonKey").value.trim();
 
-  const connectButton = document.getElementById("connectButton");
-  const loginForm = document.getElementById("loginForm");
-  const logoutButton = document.getElementById("logoutButton");
-
-  const systemStatus = document.getElementById("systemStatus");
-
-  const globalMessage = document.getElementById("globalMessage");
-  const connectMessage = document.getElementById("connectMessage");
-  const loginMessage = document.getElementById("loginMessage");
-  const recordsMessage = document.getElementById("recordsMessage");
-
-  const recordsContainer = document.getElementById("recordsContainer");
-  const historyContainer = document.getElementById("historyContainer");
-
-  const welcomeTitle = document.getElementById("welcomeTitle");
-  const userInfo = document.getElementById("userInfo");
-
-  const refreshRecordsButton =
-    document.getElementById("refreshRecordsButton");
-
-
-  /* =========================================================
-     UTILIDADES
-  ========================================================= */
-
-  function showMessage(element, text, type) {
-
-    element.innerHTML = "";
-
-    if (!text) return;
-
-    const div = document.createElement("div");
-
-    div.className = "message " + (type || "info");
-
-    div.textContent = text;
-
-    element.appendChild(div);
+  if (!url) {
+    statusBox.innerHTML = "ERROR: falta Project URL.";
+    return;
   }
 
-
-  function errorText(error) {
-
-    if (!error) {
-      return "Error desconocido.";
-    }
-
-    if (typeof error === "string") {
-      return error;
-    }
-
-    return (
-      error.message ||
-      error.error_description ||
-      error.details ||
-      error.hint ||
-      JSON.stringify(error)
-    );
+  if (!key) {
+    statusBox.innerHTML = "ERROR: falta Publishable / Anon Key.";
+    return;
   }
 
-
-  function setSystemStatus(text) {
-    systemStatus.textContent = text;
+  if (typeof window.supabase === "undefined") {
+    statusBox.innerHTML =
+      "ERROR: Supabase JS no se pudo cargar. Revisa la conexión a Internet.";
+    return;
   }
 
+  try {
 
-  function showOnly(section) {
+    supabaseClient = window.supabase.createClient(url, key);
 
-    setupSection.classList.add("hidden");
-    loginSection.classList.add("hidden");
-    appSection.classList.add("hidden");
+    statusBox.innerHTML =
+      "CONEXIÓN CONFIGURADA CORRECTAMENTE. Probando Supabase...";
 
-    section.classList.remove("hidden");
+    supabaseClient.auth.getSession()
+      .then(function(result) {
+
+        if (result.error) {
+
+          statusBox.innerHTML =
+            "Supabase respondió, pero devolvió error:<br>" +
+            result.error.message;
+
+          return;
+        }
+
+        statusBox.innerHTML =
+          "SUPABASE CONECTADO CORRECTAMENTE.";
+
+        document.getElementById("login").classList.remove("hidden");
+
+        connectButton.innerHTML = "CONECTADO";
+
+      })
+      .catch(function(error) {
+
+        statusBox.innerHTML =
+          "Error al consultar Supabase:<br>" +
+          error.message;
+
+      });
+
+  } catch (error) {
+
+    statusBox.innerHTML =
+      "ERROR CREANDO CONEXIÓN:<br>" +
+      error.message;
+
   }
 
+};
 
-  /* =========================================================
-     INICIO
-  ========================================================= */
 
-  function initialize() {
+loginButton.onclick = async function () {
 
-    console.log("=== TELECOM PLATAFORMA ===");
+  if (!supabaseClient) {
 
-    console.log(
-      "window.supabase:",
-      window.supabase
-    );
+    statusBox.innerHTML =
+      "Primero debes conectar Supabase.";
 
-    if (!window.supabase) {
+    return;
 
-      setSystemStatus(
-        "ERROR: No se pudo cargar Supabase."
+  }
+
+  var username =
+    document.getElementById("username").value.trim();
+
+  var password =
+    document.getElementById("password").value;
+
+  if (!username || !password) {
+
+    statusBox.innerHTML =
+      "Escribe usuario y contraseña.";
+
+    return;
+
+  }
+
+  statusBox.innerHTML =
+    "Iniciando sesión...";
+
+  try {
+
+    var result =
+      await supabaseClient.functions.invoke(
+        "username-login",
+        {
+          body: {
+            username: username,
+            password: password
+          }
+        }
       );
 
-      showMessage(
-        globalMessage,
-        "No se cargó la biblioteca de Supabase. " +
-        "Comprueba tu conexión a Internet y recarga la página.",
-        "error"
-      );
+    if (result.error) {
+
+      statusBox.innerHTML =
+        "Error de Edge Function:<br>" +
+        result.error.message;
 
       return;
     }
 
-    setSystemStatus(
-      "Supabase JS cargado correctamente."
-    );
+    var data = result.data;
 
-    showOnly(setupSection);
+    if (!data) {
 
-    const savedUrl =
-      localStorage.getItem("telecom_supabase_url");
+      statusBox.innerHTML =
+        "La función no devolvió datos.";
 
-    const savedKey =
-      localStorage.getItem("telecom_supabase_key");
-
-    if (savedUrl) {
-      projectUrl.value = savedUrl;
-    }
-
-    if (savedKey) {
-      publicKey.value = savedKey;
-    }
-
-    console.log("Aplicación lista.");
-
-  }
-
-
-  /* =========================================================
-     CONECTAR
-  ========================================================= */
-
-  async function connect() {
-
-    console.log("BOTÓN CONECTAR PRESIONADO");
-
-    showMessage(
-      connectMessage,
-      "Intentando conectar con Supabase...",
-      "info"
-    );
-
-    connectButton.disabled = true;
-    connectButton.textContent = "Conectando...";
-
-    try {
-
-      if (!window.supabase) {
-        throw new Error(
-          "La biblioteca de Supabase no está cargada."
-        );
-      }
-
-      const url =
-        projectUrl.value.trim().replace(/\/+$/, "");
-
-      const key =
-        publicKey.value.trim();
-
-      if (!url) {
-        throw new Error(
-          "Debes ingresar la Project URL."
-        );
-      }
-
-      if (!key) {
-        throw new Error(
-          "Debes ingresar la Publishable / Anon Key."
-        );
-      }
-
-      if (!url.startsWith("https://")) {
-        throw new Error(
-          "La Project URL debe comenzar con https://"
-        );
-      }
-
-      if (!url.includes(".supabase.co")) {
-        throw new Error(
-          "La Project URL no parece ser una URL válida de Supabase."
-        );
-      }
-
-      console.log("URL:", url);
-      console.log("Creando cliente Supabase...");
-
-      const client =
-        window.supabase.createClient(
-          url,
-          key,
-          {
-            auth: {
-              persistSession: true,
-              autoRefreshToken: true,
-              detectSessionInUrl: false
-            }
-          }
-        );
-
-      if (!client) {
-        throw new Error(
-          "Supabase no pudo crear el cliente."
-        );
-      }
-
-      supabaseClient = client;
-
-      console.log(
-        "Cliente Supabase creado correctamente."
-      );
-
-      /*
-       * Probamos la conexión con Auth.
-       */
-      const {
-        data,
-        error
-      } = await supabaseClient.auth.getSession();
-
-      console.log(
-        "Resultado getSession:",
-        data,
-        error
-      );
-
-      if (error) {
-        throw error;
-      }
-
-      /*
-       * Guardamos configuración.
-       */
-      localStorage.setItem(
-        "telecom_supabase_url",
-        url
-      );
-
-      localStorage.setItem(
-        "telecom_supabase_key",
-        key
-      );
-
-      showMessage(
-        connectMessage,
-        "Conexión correcta con Supabase. Ahora puedes iniciar sesión.",
-        "success"
-      );
-
-      setSystemStatus(
-        "Conectado a Supabase."
-      );
-
-      showOnly(loginSection);
-
-      /*
-       * Si ya existe una sesión, cargamos directamente.
-       */
-      if (data && data.session) {
-
-        console.log(
-          "Ya existe una sesión."
-        );
-
-        await loadApplication(
-          data.session
-        );
-      }
-
-    } catch (error) {
-
-      console.error(
-        "ERROR AL CONECTAR:",
-        error
-      );
-
-      supabaseClient = null;
-
-      showMessage(
-        connectMessage,
-        "NO SE PUDO CONECTAR.\n\n" +
-        errorText(error),
-        "error"
-      );
-
-      setSystemStatus(
-        "Error de conexión."
-      );
-
-      showOnly(setupSection);
-
-    } finally {
-
-      connectButton.disabled = false;
-      connectButton.textContent = "Conectar";
+      return;
 
     }
 
-  }
+    if (data.error) {
 
+      statusBox.innerHTML =
+        "Error de acceso:<br>" +
+        data.error;
 
-  /* =========================================================
-     LOGIN
-  ========================================================= */
+      return;
 
-  async function login(event) {
+    }
 
-    event.preventDefault();
+    if (data.access_token && data.refresh_token) {
 
-    console.log("LOGIN PRESIONADO");
-
-    showMessage(
-      loginMessage,
-      "Validando usuario...",
-      "info"
-    );
-
-    const loginButton =
-      document.getElementById("loginButton");
-
-    loginButton.disabled = true;
-    loginButton.textContent = "Ingresando...";
-
-    try {
-
-      if (!supabaseClient) {
-        throw new Error(
-          "Primero debes conectar con Supabase."
-        );
-      }
-
-      const username =
-        document
-          .getElementById("username")
-          .value
-          .trim()
-          .toLowerCase();
-
-      const password =
-        document
-          .getElementById("password")
-          .value;
-
-      if (!username || !password) {
-        throw new Error(
-          "Usuario y contraseña son obligatorios."
-        );
-      }
-
-      console.log(
-        "Llamando a username-login..."
-      );
-
-      /*
-       * IMPORTANTE:
-       *
-       * Tu función username-login recibe:
-       *
-       * {
-       *   username,
-       *   password
-       * }
-       *
-       * Por eso enviamos ambos.
-       */
-
-      const result =
-        await supabaseClient.functions.invoke(
-          "username-login",
-          {
-            body: {
-              username: username,
-              password: password
-            }
-          }
-        );
-
-      console.log(
-        "Respuesta username-login:",
-        result
-      );
-
-      const data = result.data;
-      const error = result.error;
-
-      if (error) {
-
-        let detail = "";
-
-        try {
-
-          if (error.context) {
-            detail =
-              await error.context.text();
-          }
-
-        } catch (_) {}
-
-        throw new Error(
-          "username-login respondió con error.\n" +
-          errorText(error) +
-          (detail ? "\n\nRespuesta:\n" + detail : "")
-        );
-      }
-
-      if (!data) {
-        throw new Error(
-          "username-login no devolvió información."
-        );
-      }
-
-      console.log(
-        "Datos recibidos:",
-        data
-      );
-
-      if (
-        !data.access_token ||
-        !data.refresh_token
-      ) {
-
-        throw new Error(
-          "La función username-login respondió, " +
-          "pero no devolvió access_token y refresh_token.\n\n" +
-          JSON.stringify(data)
-        );
-
-      }
-
-      /*
-       * Convertimos los tokens devueltos por
-       * username-login en una sesión Supabase.
-       */
-
-      const {
-        data: sessionData,
-        error: sessionError
-      } =
+      var sessionResult =
         await supabaseClient.auth.setSession({
-          access_token:
-            data.access_token,
 
-          refresh_token:
-            data.refresh_token
+          access_token: data.access_token,
+          refresh_token: data.refresh_token
+
         });
 
-      if (sessionError) {
-        throw sessionError;
+      if (sessionResult.error) {
+
+        statusBox.innerHTML =
+          "Error guardando sesión:<br>" +
+          sessionResult.error.message;
+
+        return;
+
       }
 
-      console.log(
-        "Sesión creada:",
-        sessionData
-      );
+      statusBox.innerHTML =
+        "INICIO DE SESIÓN CORRECTO.<br>" +
+        "Usuario: " +
+        (data.user && data.user.username
+          ? data.user.username
+          : username);
 
-      showMessage(
-        loginMessage,
-        "Inicio de sesión correcto.",
-        "success"
-      );
-
-      await loadApplication(
-        sessionData.session
-      );
-
-    } catch (error) {
-
-      console.error(
-        "ERROR LOGIN:",
-        error
-      );
-
-      showMessage(
-        loginMessage,
-        errorText(error),
-        "error"
-      );
-
-    } finally {
-
-      loginButton.disabled = false;
-      loginButton.textContent = "Iniciar sesión";
+      return;
 
     }
 
+    statusBox.innerHTML =
+      "La autenticación respondió, pero no entregó tokens.";
+
+  } catch (error) {
+
+    statusBox.innerHTML =
+      "ERROR DE LOGIN:<br>" +
+      error.message;
+
   }
 
+};
 
-  /* =========================================================
-     CARGAR APLICACIÓN
-  ========================================================= */
+</script>
 
-  async function loadApplication(session) {
-
-    try {
-
-      if (!session || !session.user) {
-        throw new Error(
-          "No existe una sesión válida."
-        );
-      }
-
-      currentUser =
-        session.user;
-
-      console.log(
-        "Usuario autenticado:",
-        currentUser
-      );
-
-      /*
-       * Cargar perfil.
-       */
-
-      const {
-        data: profile,
-        error: profileError
-      } =
-        await supabaseClient
-          .from("profiles")
-          .select(
-            "id, username, role, active"
-          )
-          .eq(
-            "id",
-            currentUser.id
-          )
-          .maybeSingle();
-
-      if (profileError) {
-        throw profileError;
-      }
-
-      if (!profile) {
-        throw new Error(
-          "El usuario inició sesión, pero no existe " +
-          "su registro en la tabla profiles."
-        );
-      }
-
-      if (!profile.active) {
-
-        await supabaseClient.auth.signOut();
-
-        throw new Error(
-          "Este usuario está desactivado."
-        );
-      }
-
-      currentProfile =
-        profile;
-
-      console.log(
-        "Perfil:",
-        profile
-      );
-
-      welcomeTitle.textContent =
-        "Hola, " +
-        (profile.username || "usuario");
-
-      userInfo.textContent =
-        "Usuario: " +
-        profile.username +
-        " | Rol: " +
-        profile.role;
-
-      /*
-       * Mostrar administración.
-       */
-
-      if (
-        String(profile.role).toLowerCase() ===
-        "admin"
-      ) {
-
-        adminSection.classList.remove(
-          "hidden"
-        );
-
-      } else {
-
-        adminSection.classList.add(
-          "hidden"
-        );
+</body>
+</html>
