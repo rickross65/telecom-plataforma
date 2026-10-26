@@ -1,405 +1,529 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods":
+    "POST, OPTIONS",
+};
+
+Deno.serve(async (req) => {
+
+  /* =====================================================
+     CORS
+  ===================================================== */
+
+  if (req.method === "OPTIONS") {
+
+    return new Response(
+      "ok",
+      {
+        status: 200,
+        headers: corsHeaders
+      }
+    );
 
-  <title>Telecom Plataforma</title>
-
-  <style>
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 850px;
-      margin: 0 auto;
-      padding: 25px 15px 50px;
-    }
-
-    .header {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 3px 15px rgba(0,0,0,.08);
-    }
-
-    .header h1 {
-      margin: 0 0 15px;
-      font-size: 30px;
-    }
-
-    .status {
-      padding: 14px;
-      border-radius: 8px;
-      background: #eff6ff;
-      color: #1e3a8a;
-      word-break: break-word;
-      line-height: 1.5;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 3px 15px rgba(0,0,0,.08);
-    }
-
-    .card h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-top: 15px;
-      margin-bottom: 7px;
-    }
-
-    input {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 16px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #2563eb;
-    }
-
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 8px;
-      padding: 14px;
-      margin-top: 20px;
-      background: #111827;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1f2937;
-    }
-
-    button:disabled {
-      opacity: .6;
-      cursor: not-allowed;
-    }
-
-    .secondary {
-      background: #4b5563;
-    }
-
-    .success {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-    }
-
-    .error {
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .user-info {
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-
-    .info-box {
-      background: #f9fafb;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-      line-height: 1.6;
-    }
-
-    .small {
-      font-size: 13px;
-      color: #6b7280;
-      margin-top: 8px;
-    }
-
-  </style>
-</head>
-
-<body>
-
-<div class="container">
-
-  <!-- ENCABEZADO -->
-  <div class="header">
-
-    <h1>Telecom Plataforma</h1>
-
-    <div id="status" class="status">
-      Cargando aplicación...
-    </div>
-
-  </div>
-
-
-  <!-- CONEXIÓN SUPABASE -->
-  <div id="connectionCard" class="card">
-
-    <h2>Conectar con Supabase</h2>
-
-    <label for="projectUrl">
-      Project URL
-    </label>
-
-    <input
-      id="projectUrl"
-      type="text"
-      value="https://mgxplczimlabdctrxslu.supabase.co"
-      autocomplete="off"
-    >
-
-    <label for="anonKey">
-      Publishable / Anon Key
-    </label>
-
-    <input
-      id="anonKey"
-      type="password"
-      placeholder="Pega aquí tu Publishable / Anon Key"
-      autocomplete="off"
-    >
-
-    <button id="connectButton">
-      CONECTAR
-    </button>
-
-    <div class="small">
-      La URL debe terminar en .supabase.co y NO debe contener /rest/v1/
-    </div>
-
-  </div>
-
-
-  <!-- LOGIN -->
-  <div id="loginCard" class="card hidden">
-
-    <h2>Iniciar sesión</h2>
-
-    <label for="username">
-      Usuario
-    </label>
-
-    <input
-      id="username"
-      type="text"
-      placeholder="Ejemplo: Usuario1"
-      autocomplete="username"
-    >
-
-    <label for="password">
-      Contraseña
-    </label>
-
-    <input
-      id="password"
-      type="password"
-      placeholder="Contraseña"
-      autocomplete="current-password"
-    >
-
-    <button id="loginButton">
-      INICIAR SESIÓN
-    </button>
-
-  </div>
-
-
-  <!-- PANEL -->
-  <div id="dashboardCard" class="card hidden">
-
-    <h2>Panel principal</h2>
-
-    <div class="user-info">
-      Usuario conectado:
-      <strong id="loggedUsername"></strong>
-    </div>
-
-    <div class="info-box">
-
-      <strong>Conexión correcta</strong>
-
-      <br><br>
-
-      Supabase está conectado y la sesión está activa.
-
-      <br><br>
-
-      Rol:
-      <strong id="loggedRole"></strong>
-
-    </div>
-
-    <button id="logoutButton" class="secondary">
-      CERRAR SESIÓN
-    </button>
-
-  </div>
-
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-<script>
-
-"use strict";
-
-
-/* =========================================================
-   CONFIGURACIÓN
-========================================================= */
-
-var supabaseClient = null;
-
-var SUPABASE_URL = "";
-
-var SUPABASE_KEY = "";
-
-var currentUser = null;
-
-
-/* =========================================================
-   ELEMENTOS
-========================================================= */
-
-var statusBox =
-  document.getElementById("status");
-
-var connectionCard =
-  document.getElementById("connectionCard");
-
-var loginCard =
-  document.getElementById("loginCard");
-
-var dashboardCard =
-  document.getElementById("dashboardCard");
-
-var connectButton =
-  document.getElementById("connectButton");
-
-var loginButton =
-  document.getElementById("loginButton");
-
-var logoutButton =
-  document.getElementById("logoutButton");
-
-
-/* =========================================================
-   ESTADO
-========================================================= */
-
-function setStatus(message, type) {
-
-  statusBox.innerHTML = message;
-
-  statusBox.className = "status";
-
-  if (type === "success") {
-    statusBox.classList.add("success");
   }
 
-  if (type === "error") {
-    statusBox.classList.add("error");
+
+  /* =====================================================
+     SOLO POST
+  ===================================================== */
+
+  if (req.method !== "POST") {
+
+    return new Response(
+      JSON.stringify({
+        error: "Método no permitido."
+      }),
+      {
+        status: 405,
+        headers: {
+          ...corsHeaders,
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
   }
 
-}
-
-
-/* =========================================================
-   INICIO
-========================================================= */
-
-document.addEventListener("DOMContentLoaded", function() {
-
-  setStatus(
-    "JavaScript funcionando correctamente. Aplicación lista.",
-    "success"
-  );
-
-});
-
-
-/* =========================================================
-   CONECTAR SUPABASE
-========================================================= */
-
-connectButton.addEventListener("click", async function() {
 
   try {
 
-    connectButton.disabled = true;
+    /* ===================================================
+       LEER DATOS
+    =================================================== */
 
-    connectButton.innerText = "CONECTANDO...";
-
-    setStatus(
-      "Conectando con Supabase...",
-      null
-    );
+    const body =
+      await req.json();
 
 
-    SUPABASE_URL =
-      document.getElementById("projectUrl").value.trim();
+    const username =
+      String(
+        body?.username || ""
+      ).trim();
 
-    SUPABASE_KEY =
-      document.getElementById("anonKey").value.trim();
+
+    const password =
+      String(
+        body?.password || ""
+      );
 
 
-    /* -----------------------------------------------------
-       VALIDACIONES
-    ----------------------------------------------------- */
+    if (!username) {
 
-    if (!SUPABASE_URL) {
-
-      throw new Error(
-        "Debes ingresar el Project URL."
+      return new Response(
+        JSON.stringify({
+          error:
+            "El usuario es obligatorio."
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
       );
 
     }
 
 
-    if (!SUPABASE_KEY) {
+    if (!password) {
 
-      throw new Error(
-        "Debes ingresar la Publishable / Anon Key."
+      return new Response(
+        JSON.stringify({
+          error:
+            "La contraseña es obligatoria."
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
       );
 
     }
+
+
+    /* ===================================================
+       VARIABLES SUPABASE
+    =================================================== */
+
+    const supabaseUrl =
+      Deno.env.get(
+        "SUPABASE_URL"
+      );
+
+
+    const serviceRoleKey =
+      Deno.env.get(
+        "SUPABASE_SERVICE_ROLE_KEY"
+      );
+
+
+    const anonKey =
+      Deno.env.get(
+        "SUPABASE_ANON_KEY"
+      );
+
+
+    if (!supabaseUrl) {
+
+      throw new Error(
+        "Falta SUPABASE_URL en las variables de entorno."
+      );
+
+    }
+
+
+    if (!serviceRoleKey) {
+
+      throw new Error(
+        "Falta SUPABASE_SERVICE_ROLE_KEY en las variables de entorno."
+      );
+
+    }
+
+
+    if (!anonKey) {
+
+      throw new Error(
+        "Falta SUPABASE_ANON_KEY en las variables de entorno."
+      );
+
+    }
+
+
+    /* ===================================================
+       CLIENTE ADMIN
+    =================================================== */
+
+    const supabaseAdmin =
+      createClient(
+        supabaseUrl,
+        serviceRoleKey,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+
+
+    /* ===================================================
+       BUSCAR PERFIL
+    =================================================== */
+
+    const {
+      data: profile,
+      error: profileError
+    } =
+      await supabaseAdmin
+        .from("profiles")
+        .select(
+          "id, username, role, active"
+        )
+        .ilike(
+          "username",
+          username
+        )
+        .maybeSingle();
+
+
+    if (profileError) {
+
+      console.error(
+        "ERROR PROFILES:",
+        profileError
+      );
+
+
+      return new Response(
+        JSON.stringify({
+          error:
+            "Error consultando profiles: " +
+            profileError.message
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+    }
+
+
+    if (!profile) {
+
+      return new Response(
+        JSON.stringify({
+          error:
+            "El usuario no existe."
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+    }
+
+
+    /* ===================================================
+       VERIFICAR ACTIVO
+    =================================================== */
+
+    if (profile.active !== true) {
+
+      return new Response(
+        JSON.stringify({
+          error:
+            "El usuario está desactivado."
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+    }
+
+
+    /* ===================================================
+       BUSCAR USUARIO AUTH
+    =================================================== */
+
+    const {
+      data: authUserData,
+      error: authUserError
+    } =
+      await supabaseAdmin
+        .auth
+        .admin
+        .getUserById(
+          profile.id
+        );
+
+
+    if (authUserError) {
+
+      console.error(
+        "ERROR AUTH USER:",
+        authUserError
+      );
+
+
+      return new Response(
+        JSON.stringify({
+          error:
+            "No se pudo encontrar la cuenta Auth del usuario: " +
+            authUserError.message
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+    }
+
+
+    const authUser =
+      authUserData?.user;
 
 
     if (
-      SUPABASE_URL.includes("/rest/v1")
+      !authUser ||
+      !authUser.email
     ) {
 
-      throw new Error(
-        "La Project URL
+      return new Response(
+        JSON.stringify({
+          error:
+            "El usuario existe en profiles, pero no tiene una cuenta Auth asociada."
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+    }
+
+
+    /* ===================================================
+       AUTENTICAR CONTRASEÑA
+    =================================================== */
+
+    const authResponse =
+      await fetch(
+        supabaseUrl +
+        "/auth/v1/token?grant_type=password",
+        {
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json",
+
+            "apikey":
+              anonKey
+
+          },
+
+          body: JSON.stringify({
+
+            email:
+              authUser.email,
+
+            password:
+              password
+
+          })
+
+        }
+      );
+
+
+    const authText =
+      await authResponse.text();
+
+
+    let authResult = null;
+
+
+    try {
+
+      authResult =
+        JSON.parse(authText);
+
+    } catch (e) {
+
+      authResult = null;
+
+    }
+
+
+    /* ===================================================
+       CONTRASEÑA INCORRECTA
+    =================================================== */
+
+    if (!authResponse.ok) {
+
+      console.error(
+        "ERROR AUTH:",
+        authText
+      );
+
+
+      return new Response(
+        JSON.stringify({
+          error:
+            "Usuario o contraseña incorrectos."
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+    }
+
+
+    /* ===================================================
+       VERIFICAR TOKENS
+    =================================================== */
+
+    if (
+      !authResult ||
+      !authResult.access_token ||
+      !authResult.refresh_token
+    ) {
+
+      return new Response(
+        JSON.stringify({
+          error:
+            "Supabase Auth no devolvió los tokens de sesión."
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+    }
+
+
+    /* ===================================================
+       ÉXITO
+    =================================================== */
+
+    return new Response(
+      JSON.stringify({
+
+        access_token:
+          authResult.access_token,
+
+        refresh_token:
+          authResult.refresh_token,
+
+        expires_in:
+          authResult.expires_in,
+
+        token_type:
+          authResult.token_type,
+
+        user: {
+
+          id:
+            profile.id,
+
+          username:
+            profile.username,
+
+          role:
+            profile.role
+
+        }
+
+      }),
+      {
+        status: 200,
+
+        headers: {
+          ...corsHeaders,
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "ERROR GENERAL:",
+      error
+    );
+
+
+    return new Response(
+      JSON.stringify({
+
+        error:
+          error instanceof Error
+            ? error.message
+            : "Error interno de autenticación."
+
+      }),
+      {
+        status: 500,
+
+        headers: {
+          ...corsHeaders,
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+  }
+
+});
